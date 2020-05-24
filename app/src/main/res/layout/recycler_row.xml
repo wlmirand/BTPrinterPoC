@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:orientation="horizontal"
+    android:paddingBottom="3dp">
+
+    <TextView
+        android:id="@+id/btName"
+        android:layout_width="143dp"
+        android:layout_height="wrap_content"
+        android:paddingRight="2dp"
+        android:textSize="15sp" />
+
+
+    <CheckBox
+        android:id="@+id/btSelected"
+        android:layout_width="108dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingRight="2dp" />
+
+    <Button
+        android:id="@+id/btBonded"
+        android:layout_width="34dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="pair"
+        android:textSize="15sp" />
+
+</LinearLayout>

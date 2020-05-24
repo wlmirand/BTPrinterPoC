@@ -4,24 +4,100 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorFragment"
     tools:context=".ui.MainActivity">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/action"
+        android:layout_width="306dp"
+        android:layout_height="20dp"
+        android:text=""
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_orange_dark"
+        app:layout_constraintBottom_toTopOf="@+id/status"
+        tools:layout_editor_absoluteX="40dp" />
+
+    <TextView
+        android:id="@+id/statusLabel"
+        android:layout_width="80dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="80dp"
+        android:text="BT Status"
+        android:textAlignment="center"
+        android:textColor="@color/defaultText"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="210dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="80dp"
+        android:text="N/A"
+        android:textAlignment="center"
+        android:textColor="@color/defaultText"
+        android:textSize="15dp"
+        app:layout_constraintStart_toEndOf="@+id/statusLabel"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/buttonPrint"
+        android:id="@+id/buttonBTActivate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Print"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="88dp"
+        android:text="Activate BlueTooth"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintHorizontal_bias="0.919"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/buttonBTSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:text="Search Devices"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.791"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ScrollView
+        android:layout_width="320dp"
+        android:layout_height="300dp"
+        android:layout_marginStart="16dp"
+        android:background="@color/defaultText"
+        app:layout_constraintBottom_toTopOf="@+id/buttonBTActivate"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/status"
+        app:layout_constraintVertical_bias="0.521">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/devices"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            app:layout_constraintBottom_toTopOf="@+id/buttonBTActivate"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/status"
+            app:layout_constraintVertical_bias="0.0" />
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/print"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="40dp"
+        android:text="Print Sample"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/buttonBTSearch" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
