@@ -1,23 +1,18 @@
 package com.example.daggerapplication.ui.home;
 
+import android.bluetooth.BluetoothDevice;
+
 import androidx.lifecycle.ViewModel;
 
 import com.example.daggerapplication.services.bluetooth.BluetoothService;
-import com.example.daggerapplication.services.bluetooth.exception.DeviceConnectionFailureException;
-import com.example.daggerapplication.services.bluetooth.exception.DeviceNotFoundException;
-import com.example.daggerapplication.services.bluetooth.model.DeviceConnectionResult;
-import com.example.daggerapplication.services.bluetooth.model.DeviceInformation;
-import com.example.daggerapplication.services.bluetooth.model.DeviceType;
+import com.example.daggerapplication.services.bluetooth.ConnectionObserver;
+import com.example.daggerapplication.services.bluetooth.DeviceType;
 import com.example.daggerapplication.services.printer.PrinterService;
-
-import java.util.HashSet;
 import java.util.Observer;
 import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-
-import io.reactivex.Single;
 
 public class HomeViewModel extends ViewModel {
 
@@ -28,48 +23,36 @@ public class HomeViewModel extends ViewModel {
     private Observer fragmentObserver;
 
     @Inject
-    public HomeViewModel(BluetoothService btService, PrinterService printerService) {
+    HomeViewModel(BluetoothService btService, PrinterService printerService) {
         this.btService = btService;
         this.printerService = printerService;
     }
 
-    public void activate() {
+    void activate() {
         btService.activate();
     }
 
-    public Single<HashSet<DeviceInformation>> getDevicesInformation() {
-        return btService.getDevicesInformation();
+    Set<BluetoothDevice> getDevicesInformation() {
+        return btService.getBondedDevices();
     }
 
-    public boolean isBTAvailable() {
+    boolean isBTAvailable() {
         return btService.isAvailable();
     }
 
-    public boolean isBTActivated() {
+    boolean isBTActivated() {
         return btService.isActivated();
     }
 
-    public DeviceConnectionResult selectForDeviceType(String deviceKey, DeviceType deviceType) {
-        try {
-            return btService.selectForType(deviceKey, deviceType);
-        } catch (DeviceNotFoundException e) {
-            e.printStackTrace();
-        } catch (DeviceConnectionFailureException e) {
-            e.printStackTrace();
-        }
-        return null;
+    void connect(BluetoothDevice device, DeviceType deviceType) {
+       btService.connect(device, deviceType);
     }
 
-    public Single<DeviceInformation> pair(String deviceKey) {
-        try {
-            return btService.pair(deviceKey);
-        } catch (DeviceConnectionFailureException e) {
-            e.printStackTrace();
-        }
-        return null;
+    void register(ConnectionObserver observer) {
+        btService.registerOnConnectionNotifications(observer);
     }
 
-    public void print() {
+    void print() {
         printerService.print();
     }
 }
