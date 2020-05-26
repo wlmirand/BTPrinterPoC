@@ -59,7 +59,7 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
         holder.btSelected.setEnabled(true);
         holder.btSelected.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                viewModel.connect(dataList.get(position), DeviceType.PRINTER);
+                viewModel.selectDevice(dataList.get(position), DeviceType.PRINTER, isChecked);
             }
         });
     }

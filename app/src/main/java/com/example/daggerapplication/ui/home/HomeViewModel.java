@@ -5,12 +5,11 @@ import android.bluetooth.BluetoothDevice;
 import androidx.lifecycle.ViewModel;
 
 import com.example.daggerapplication.services.bluetooth.BluetoothService;
-import com.example.daggerapplication.services.bluetooth.ConnectionObserver;
 import com.example.daggerapplication.services.bluetooth.DeviceType;
 import com.example.daggerapplication.services.printer.PrinterService;
-import java.util.Observer;
+
+import java.util.HashMap;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -18,9 +17,7 @@ public class HomeViewModel extends ViewModel {
 
     private final PrinterService printerService;
     private BluetoothService btService;
-    private Set<String> devicesNames;
-    private Consumer<String> consumer;
-    private Observer fragmentObserver;
+    private HashMap<DeviceType, BluetoothDevice> deviceByType = new HashMap<>();
 
     @Inject
     HomeViewModel(BluetoothService btService, PrinterService printerService) {
@@ -44,15 +41,20 @@ public class HomeViewModel extends ViewModel {
         return btService.isActivated();
     }
 
-    void connect(BluetoothDevice device, DeviceType deviceType) {
-       btService.connect(device, deviceType);
+
+    void print() throws Exception {
+        if (deviceByType.containsKey(DeviceType.PRINTER)) {
+            printerService.print(deviceByType.get(DeviceType.PRINTER));
+        } else {
+            throw new Exception("No Device Selected");
+        }
     }
 
-    void register(ConnectionObserver observer) {
-        btService.registerOnConnectionNotifications(observer);
-    }
-
-    void print() {
-        printerService.print();
+    void selectDevice(BluetoothDevice bluetoothDevice, DeviceType deviceType, boolean isChecked) {
+        if (isChecked) {
+            deviceByType.put(deviceType, bluetoothDevice);
+        } else {
+            deviceByType.remove(deviceType);
+        }
     }
 }
