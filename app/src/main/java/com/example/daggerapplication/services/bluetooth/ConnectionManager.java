@@ -112,7 +112,7 @@ class ConnectionManager {
 
             final BluetoothSocket socket = socketByDeviceType.remove(deviceType);
             if (socket != null && socket.isConnected()) {
-                Log.i(LOG_TAG, "Socket closed for device: " + address + " of device type" + deviceType);
+                Log.i(LOG_TAG, "Socket closed for device: " + address + " of device type : " + deviceType);
                 socket.close();
             }
 
@@ -138,11 +138,10 @@ class ConnectionManager {
         if (socketByDeviceType.containsKey(deviceType)) {
             final BluetoothSocket socket = socketByDeviceType.get(deviceType);
             if (socket!=null && socket.isConnected()) {
-                return Single.just(socket).subscribeOn(Schedulers.io());
+                return Single.just(socket);
             } else {
                 Log.i(LOG_TAG, "Socket not connected - Retry for device " + socket.getRemoteDevice().getName() + "[" + socket.getRemoteDevice().getAddress() + "]");
-                return Single.fromObservable(Observable.defer(() -> Observable.create(new SocketConnectionOnSubscribe(socket.getRemoteDevice(), deviceType))
-                        .subscribeOn(Schedulers.io())));
+                return Single.fromObservable(Observable.defer(() -> Observable.create(new SocketConnectionOnSubscribe(socket.getRemoteDevice(), deviceType))));
             }
         } else {
             Log.e(LOG_TAG, "No Device Selected for type : " + deviceType);

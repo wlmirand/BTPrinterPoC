@@ -1,5 +1,7 @@
 package com.example.daggerapplication.ui.home;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +19,6 @@ import com.example.daggerapplication.ui.CompositeDisposable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
 public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothDevicesListAdapter.MyViewHolder> {
@@ -78,7 +79,7 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
         holder.connection.setChecked(dataMap.get(key).isConnected());
         holder.connection.setOnCheckedChangeListener((buttonView, clicked) -> {
             final Disposable disposable = viewModel.selectUnselectDevice(dataMap.get(key), DeviceType.PRINTER, clicked)
-                    .subscribe(success -> System.out.println("OK"), throwable -> System.out.println("NOK"));
+                    .subscribe(deviceInformation -> updateDataWith(deviceInformation), throwable -> System.out.print("ERROR"));
             CompositeDisposable.add(disposable);
         });
     }
@@ -87,6 +88,10 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
     @Override
     public int getItemCount() {
         return dataMap != null ? dataMap.size() : 0;
+    }
+
+    private void updateDataWith(DeviceInformation deviceInformation) {
+        dataMap.put(deviceInformation.getAddress(), deviceInformation);
     }
 
 }

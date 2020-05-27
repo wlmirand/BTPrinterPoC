@@ -57,8 +57,8 @@ public class PrinterService {
     }
 
     public Observable<PrintStatus> print(final PrintableDocument document) {
-        return Observable.create(new PrinterStatusObserver(document))
-                .subscribeOn(AndroidSchedulers.mainThread());
+        return Observable.defer(() -> Observable.create(new PrinterStatusObserver(document))
+                .subscribeOn(AndroidSchedulers.mainThread()));
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////

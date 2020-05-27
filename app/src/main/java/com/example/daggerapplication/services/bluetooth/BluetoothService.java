@@ -83,7 +83,6 @@ public class BluetoothService {
      */
     public Observable<Set<DeviceInformation>> getDevicesInformation() {
         final IntentFilter intentFilter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         return Observable.fromArray(btAdapter.getBondedDevices())
                 .map(bluetoothDevices -> deviceInformationMapper.mapSet(bluetoothDevices))
                 .concatWith(BroadcastReceiverObservable.create(appContext, intentFilter)
