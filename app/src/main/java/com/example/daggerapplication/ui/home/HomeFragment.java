@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.daggerapplication.R;
 import com.example.daggerapplication.dagger.ViewModelFactory;
+import com.example.daggerapplication.services.printer.model.PrintableDocument;
+import com.example.daggerapplication.ui.CompositeDisposable;
 
 import javax.inject.Inject;
 
@@ -50,6 +52,10 @@ public class HomeFragment extends DaggerFragment {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -64,8 +70,6 @@ public class HomeFragment extends DaggerFragment {
         // use a linear layout manager
         devices.setLayoutManager(new LinearLayoutManager(getContext()));
         devices.addItemDecoration(new DividerItemDecoration(devices.getContext(), DividerItemDecoration.VERTICAL));
-
-
         devices.setAdapter(mAdapter);
 
         buttonBTActivate = view.findViewById(R.id.buttonBTActivate);
@@ -73,6 +77,7 @@ public class HomeFragment extends DaggerFragment {
 
         buttonPrint = view.findViewById(R.id.print);
         status = view.findViewById(R.id.status);
+
         buttonPrint.setOnClickListener(e -> onClick(e, status));
 
         buttonBTActivate.setEnabled(viewModel.isBTAvailable() && !viewModel.isBTActivated());
@@ -97,11 +102,28 @@ public class HomeFragment extends DaggerFragment {
         }
     }
 
+
     private void onClick(View v, TextView status) {
-        try {
-            viewModel.print();
-        } catch (Exception e) {
-            status.setText("ERROR " + e.getMessage());
-        }
+        CompositeDisposable.add(viewModel.print(
+                PrintableDocument.builder()
+                        .title("A TITLE")
+                        .build()).subscribe(
+                printStatus -> {
+                    final int color;
+                    status.setText(printStatus.getStatus().toString());
+                    switch (printStatus.getStatus()) {
+                        case SUCCESS:
+                            color = Color.GREEN;
+                            break;
+                        case ERROR:
+                            color = Color.RED;
+                            break;
+                        default:
+                            color = Color.YELLOW;
+                    }
+                    status.setTextColor(color);
+                }
+        ));
     }
+
 }

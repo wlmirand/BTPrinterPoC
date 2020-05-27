@@ -19,4 +19,9 @@ public class MainActivity extends DaggerAppCompatActivity {
         getSupportFragmentManager().beginTransaction().replace(R.id.placeholder, new HomeFragment()).commit();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        CompositeDisposable.clear();
+    }
 }

@@ -1,23 +1,25 @@
 package com.example.daggerapplication.ui.home;
 
-import android.bluetooth.BluetoothDevice;
-
 import androidx.lifecycle.ViewModel;
 
 import com.example.daggerapplication.services.bluetooth.BluetoothService;
-import com.example.daggerapplication.services.bluetooth.DeviceType;
+import com.example.daggerapplication.services.bluetooth.model.DeviceInformation;
+import com.example.daggerapplication.services.bluetooth.model.DeviceType;
 import com.example.daggerapplication.services.printer.PrinterService;
+import com.example.daggerapplication.services.printer.model.PrintStatus;
+import com.example.daggerapplication.services.printer.model.PrintableDocument;
 
-import java.util.HashMap;
 import java.util.Set;
 
 import javax.inject.Inject;
+
+import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public class HomeViewModel extends ViewModel {
 
     private final PrinterService printerService;
     private BluetoothService btService;
-    private HashMap<DeviceType, BluetoothDevice> deviceByType = new HashMap<>();
 
     @Inject
     HomeViewModel(BluetoothService btService, PrinterService printerService) {
@@ -29,8 +31,8 @@ public class HomeViewModel extends ViewModel {
         btService.activate();
     }
 
-    Set<BluetoothDevice> getDevicesInformation() {
-        return btService.getBondedDevices();
+    Observable<Set<DeviceInformation>> getDevicesInformation() {
+        return btService.getDevicesInformation();
     }
 
     boolean isBTAvailable() {
@@ -42,19 +44,11 @@ public class HomeViewModel extends ViewModel {
     }
 
 
-    void print() throws Exception {
-        if (deviceByType.containsKey(DeviceType.PRINTER)) {
-            printerService.print(deviceByType.get(DeviceType.PRINTER));
-        } else {
-            throw new Exception("No Device Selected");
-        }
+    Observable<PrintStatus> print(PrintableDocument document) {
+        return printerService.print(document);
     }
 
-    void selectDevice(BluetoothDevice bluetoothDevice, DeviceType deviceType, boolean isChecked) {
-        if (isChecked) {
-            deviceByType.put(deviceType, bluetoothDevice);
-        } else {
-            deviceByType.remove(deviceType);
-        }
+    Single<DeviceInformation> selectUnselectDevice(DeviceInformation deviceInformation, DeviceType deviceType, boolean isChecked) {
+        return btService.selectUnselectAndConnect(deviceInformation, deviceType, isChecked);
     }
 }
