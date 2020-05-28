@@ -12,7 +12,7 @@ public enum BondState {
         this.code = code;
     }
 
-    static BondState fromCode(int codeValue) {
+    public static BondState fromCode(int codeValue) {
         for (BondState currentState : values()) {
             if (currentState.code == codeValue) {
                 return currentState;

@@ -11,21 +11,23 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 @Mapper
 public abstract class DeviceInformationMapper {
 
-    private Map<DeviceType, BluetoothSocket> socketMap;
+    private HashMap<DeviceType, BluetoothSocket> socketMap;
 
-    public void setCurrentSocketMap(Map<DeviceType, BluetoothSocket> socketMap) {
-        this.socketMap = socketMap;
+    public void setCurrentSockets(HashMap<DeviceType,BluetoothSocket> bluetoothSockets) {
+        this.socketMap = bluetoothSockets;
     }
 
     public abstract Set<DeviceInformation> mapSet(Set<BluetoothDevice> devices);
 
-    DeviceInformation map(BluetoothDevice device) {
+    public DeviceInformation map(BluetoothDevice device) {
         return map(BluetoothDeviceWrapper.builder().device(device).build());
     }
 

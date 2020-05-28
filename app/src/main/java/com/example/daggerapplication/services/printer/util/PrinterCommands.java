@@ -51,8 +51,10 @@ public class PrinterCommands {
 
 
     /*********************************************/
+
     public static final byte[] ESC_HORIZONTAL_CENTERS = new byte[] { 0x1B, 0x44, 20, 28, 00};
     public static final byte[] ESC_CANCLE_HORIZONTAL_CENTERS = new byte[] { 0x1B, 0x44, 00 };
+
     /*********************************************/
 
     public static final byte[] ESC_ENTER = new byte[] { 0x1B, 0x4A, 0x40 };

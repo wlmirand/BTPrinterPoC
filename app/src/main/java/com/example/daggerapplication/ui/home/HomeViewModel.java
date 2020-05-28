@@ -14,7 +14,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.Single;
 
 public class HomeViewModel extends ViewModel {
 
@@ -27,7 +26,7 @@ public class HomeViewModel extends ViewModel {
         this.printerService = printerService;
     }
 
-    void activate() {
+    void activateBluetooth() {
         btService.activate();
     }
 
@@ -35,11 +34,11 @@ public class HomeViewModel extends ViewModel {
         return btService.getDevicesInformation();
     }
 
-    boolean isBTAvailable() {
+    boolean isBluetoothAvailable() {
         return btService.isAvailable();
     }
 
-    boolean isBTActivated() {
+    boolean isBlueToothActivated() {
         return btService.isActivated();
     }
 
@@ -48,7 +47,7 @@ public class HomeViewModel extends ViewModel {
         return printerService.print(document);
     }
 
-    Single<DeviceInformation> selectUnselectDevice(DeviceInformation deviceInformation, DeviceType deviceType, boolean isChecked) {
+    Observable<Boolean> selectUnselectDevice(DeviceInformation deviceInformation, DeviceType deviceType, boolean isChecked) {
         return btService.selectUnselectAndConnect(deviceInformation, deviceType, isChecked);
     }
 }

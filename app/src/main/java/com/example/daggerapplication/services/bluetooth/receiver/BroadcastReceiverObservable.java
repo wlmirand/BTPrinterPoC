@@ -15,6 +15,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class BroadcastReceiverObservable implements ObservableOnSubscribe<Intent> {
 
+    public static final String UNBLOCK = "UNBLOCK";
     private final WeakReference<Context> contextWeakReference;
     private IntentFilter intentFilter;
 
@@ -31,6 +32,9 @@ public class BroadcastReceiverObservable implements ObservableOnSubscribe<Intent
 
     @Override
     public void subscribe(ObservableEmitter<Intent> emitter) throws Exception {
+        final Intent intentUnblockInitalCombinedLatest = new Intent();
+        intentUnblockInitalCombinedLatest.setAction(UNBLOCK);
+        emitter.onNext(intentUnblockInitalCombinedLatest);
         BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

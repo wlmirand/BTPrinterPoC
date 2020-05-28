@@ -26,6 +26,9 @@ import dagger.android.support.DaggerFragment;
 
 public class HomeFragment extends DaggerFragment {
 
+    public static final String ACTIVE = "ACTIVE";
+    public static final String INACTIVE = "INACTIVE";
+    public static final String BLUETOOTH_NOT_SUPPORTED = "BLUETOOTH NOT SUPPORTED";
     /**
      * ViewModel Factory, because we dont want to pass lots of parameters
      */
@@ -37,6 +40,7 @@ public class HomeFragment extends DaggerFragment {
      */
     private HomeViewModel viewModel;
     private TextView status;
+    private TextView message;
     private RecyclerView devices;
     private Button buttonBTActivate;
     private Button buttonBTSearch;
@@ -61,49 +65,49 @@ public class HomeFragment extends DaggerFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
         action = view.findViewById(R.id.action);
-        devices = view.findViewById(R.id.devices);
+        message = view.findViewById(R.id.message);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
+        devices = view.findViewById(R.id.devices);
         devices.setHasFixedSize(true);
 
-        // use a linear layout manager
         devices.setLayoutManager(new LinearLayoutManager(getContext()));
         devices.addItemDecoration(new DividerItemDecoration(devices.getContext(), DividerItemDecoration.VERTICAL));
         devices.setAdapter(mAdapter);
 
         buttonBTActivate = view.findViewById(R.id.buttonBTActivate);
-        buttonBTActivate.setOnClickListener(v -> viewModel.activate());
+        buttonBTActivate.setOnClickListener(v -> {
+            action.setText("ACTIVATE BT");
+            action.setTextColor(Color.GRAY);
+            viewModel.activateBluetooth();
+        });
 
         buttonPrint = view.findViewById(R.id.print);
         status = view.findViewById(R.id.status);
 
-        buttonPrint.setOnClickListener(e -> onClick(e, status));
-
-        buttonBTActivate.setEnabled(viewModel.isBTAvailable() && !viewModel.isBTActivated());
-
-        buttonBTSearch = view.findViewById(R.id.buttonBTSearch);
-        buttonBTSearch.setOnClickListener(v -> {
+        buttonPrint.setOnClickListener(e -> {
+            action.setText("PRINT");
+            action.setTextColor(Color.GRAY);
+            onClickPrint(e,action);
         });
-        buttonBTSearch.setEnabled(viewModel.isBTActivated());
 
+        buttonBTActivate.setEnabled(viewModel.isBluetoothAvailable() && !viewModel.isBlueToothActivated());
 
-        if (viewModel.isBTAvailable()) {
-            if (viewModel.isBTActivated()) {
-                status.setText("ACTIVE");
+        if (viewModel.isBluetoothAvailable()) {
+            if (viewModel.isBlueToothActivated()) {
+                status.setText(ACTIVE);
                 status.setTextColor(Color.GREEN);
             } else {
-                status.setText("INACTIVE");
+                status.setText(INACTIVE);
                 status.setTextColor(Color.YELLOW);
             }
         } else {
-            status.setText("BLUETOOTH NOT SUPPORTED");
+            status.setText(BLUETOOTH_NOT_SUPPORTED);
             status.setTextColor(Color.RED);
         }
     }
 
 
-    private void onClick(View v, TextView status) {
+    private void onClickPrint(View v, TextView status) {
         CompositeDisposable.add(viewModel.print(
                 PrintableDocument.builder()
                         .title("A TITLE")

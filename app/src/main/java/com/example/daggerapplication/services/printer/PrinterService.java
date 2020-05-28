@@ -41,12 +41,42 @@ public class PrinterService {
                                 outputStream.write(printout);
                                 outputStream.write(PrinterCommands.ESC_ALIGN_LEFT);
                                 outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+
                                 outputStream.flush();
                                 emitter.onNext(PrintStatus.builder().status(PrintStatus.Status.SUCCESS).build());
                             },
                             throwable -> {
                                 Log.e(LOG_TAG, "Error encountered while printing", throwable);
-                                emitter.onNext(PrintStatus.builder().status(PrintStatus.Status.ERROR).message("Error on retrieving socket connection").build());
+                                emitter.onNext(PrintStatus.builder().status(PrintStatus.Status.ERROR).message(throwable.getMessage()).build());
                             }).dispose();
         }
     }
@@ -57,8 +87,12 @@ public class PrinterService {
     }
 
     public Observable<PrintStatus> print(final PrintableDocument document) {
-        return Observable.defer(() -> Observable.create(new PrinterStatusObserver(document))
-                .subscribeOn(AndroidSchedulers.mainThread()));
+//        return Observable.defer(() -> Observable.create(new PrinterStatusObserver(document))
+//                .observeOn(AndroidSchedulers.mainThread()));
+
+        return Observable.create(new PrinterStatusObserver(document))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io());
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////

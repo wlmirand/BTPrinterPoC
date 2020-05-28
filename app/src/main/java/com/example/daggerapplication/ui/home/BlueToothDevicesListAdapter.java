@@ -1,12 +1,11 @@
 package com.example.daggerapplication.ui.home;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,14 +16,16 @@ import com.example.daggerapplication.services.bluetooth.model.DeviceType;
 import com.example.daggerapplication.ui.CompositeDisposable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothDevicesListAdapter.MyViewHolder> {
 
     private final HomeViewModel viewModel;
-    private HashMap<String, DeviceInformation> dataMap;
+    private List<DeviceInformation> dataList = new ArrayList<>();
 
     static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView deviceName;
@@ -39,17 +40,19 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
 
     BlueToothDevicesListAdapter(HomeViewModel viewModel) {
         this.viewModel = viewModel;
-        this.dataMap = new HashMap<>();
-        CompositeDisposable.add(viewModel.getDevicesInformation()
+        Disposable disposable = viewModel.getDevicesInformation()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
                 .subscribe(
                         devicesInformation -> {
-                            for (DeviceInformation info : devicesInformation) {
-                                dataMap.put(info.getAddress(), info);
-                            }
+                            final ArrayList<DeviceInformation> devices = new ArrayList<>();
+                            devices.addAll(devicesInformation);
+                            dataList = devices;
                             notifyDataSetChanged();
                         },
-                        throwable -> dataMap = new HashMap<>()
-                ));
+                        throwable -> dataList.clear());
+
+        CompositeDisposable.add(disposable);
     }
 
     @Override
@@ -57,41 +60,37 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
         super.onDetachedFromRecyclerView(recyclerView);
     }
 
-    // Create new views (invoked by the layout manager)
     @NonNull
     @Override
     public BlueToothDevicesListAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
                                                                        int viewType) {
-        // create a new view
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.recycler_row, parent, false);
         return new MyViewHolder(v);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
 
-        final ArrayList<String> keys = new ArrayList(dataMap.keySet());
-        final String key = keys.get(position);
+        final DeviceInformation data = dataList.get(position);
 
-        holder.deviceName.setText(dataMap.get(key).getName());
-        holder.connection.setChecked(dataMap.get(key).isConnected());
+        holder.deviceName.setText(data.getName());
         holder.connection.setOnCheckedChangeListener((buttonView, clicked) -> {
-            final Disposable disposable = viewModel.selectUnselectDevice(dataMap.get(key), DeviceType.PRINTER, clicked)
-                    .subscribe(deviceInformation -> updateDataWith(deviceInformation), throwable -> System.out.print("ERROR"));
+            System.out.println(data);
+            final boolean isChecked = clicked;
+            buttonView.setChecked(!clicked);
+            final Disposable disposable = viewModel.selectUnselectDevice(dataList.get(position), DeviceType.PRINTER, isChecked)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(deviceInformation -> {
+                        Toast.makeText(buttonView.getContext(), data.getName() + "[" + data.getAddress() + "] Connected", Toast.LENGTH_LONG).show();
+                    }, throwable -> Toast.makeText(buttonView.getContext(), data.getName() + "[" + data.getAddress() + "] Not Connected", Toast.LENGTH_LONG).show());
             CompositeDisposable.add(disposable);
         });
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return dataMap != null ? dataMap.size() : 0;
+        return dataList != null ? dataList.size() : 0;
     }
-
-    private void updateDataWith(DeviceInformation deviceInformation) {
-        dataMap.put(deviceInformation.getAddress(), deviceInformation);
-    }
-
 }

@@ -9,20 +9,20 @@ import android.content.IntentFilter;
 
 import com.example.daggerapplication.services.bluetooth.mapper.DeviceInformationMapper;
 import com.example.daggerapplication.services.bluetooth.model.BluetoothState;
+import com.example.daggerapplication.services.bluetooth.model.BondState;
 import com.example.daggerapplication.services.bluetooth.model.DeviceInformation;
 import com.example.daggerapplication.services.bluetooth.model.DeviceType;
 import com.example.daggerapplication.services.bluetooth.receiver.BroadcastReceiverObservable;
 
 import org.mapstruct.factory.Mappers;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 @Singleton
@@ -40,7 +40,6 @@ public class BluetoothService {
         this.appContext = context;
         this.connectionManager = connectionManager;
         this.deviceInformationMapper = Mappers.getMapper(DeviceInformationMapper.class);
-        this.deviceInformationMapper.setCurrentSocketMap(connectionManager.getSocketMap());
         btAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
@@ -82,12 +81,41 @@ public class BluetoothService {
      * @return Observable on bonded Devices Information (disposable)
      */
     public Observable<Set<DeviceInformation>> getDevicesInformation() {
+        final Observable<Set<DeviceInformation>> observerCurrentSockets = connectionManager.getBluetoothSockets()
+                .map(bluetoothSockets -> {
+                    final Set<BluetoothDevice> bondedDevices = btAdapter.getBondedDevices();
+                    deviceInformationMapper.setCurrentSockets(bluetoothSockets);
+                    return deviceInformationMapper.mapSet(bondedDevices);
+                });
+
         final IntentFilter intentFilter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        return Observable.fromArray(btAdapter.getBondedDevices())
-                .map(bluetoothDevices -> deviceInformationMapper.mapSet(bluetoothDevices))
-                .concatWith(BroadcastReceiverObservable.create(appContext, intentFilter)
-                        .map(intent -> deviceInformationMapper.mapSet(btAdapter.getBondedDevices()))
-                ).subscribeOn(Schedulers.io());
+        final Observable<Intent> observerExternalEvents =
+                BroadcastReceiverObservable.create(appContext, intentFilter);
+
+        return Observable.combineLatest(observerCurrentSockets, observerExternalEvents,
+                (devicesInfo, intent) -> {
+                    // inspect what appears externally
+                    final String action = intent.getAction();
+                    final ArrayList<DeviceInformation> devices = new ArrayList<>();
+                    if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
+                        final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                        final BondState state = BondState.fromCode(intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1));
+                        switch (state) {
+                            case BOND_BONDED:
+                                final DeviceInformation newBonded = deviceInformationMapper.map(device);
+                                if (!devices.contains(newBonded)) {
+                                    devicesInfo.add(newBonded);
+                                }
+                                break;
+                            case BOND_NONE:
+                                final DeviceInformation newNotBonded = deviceInformationMapper.map(device);
+                                if (devices.contains(newNotBonded)) {
+                                    devicesInfo.remove(newNotBonded);
+                                }
+                        }
+                    }
+                    return devicesInfo;
+                }).subscribeOn(Schedulers.io());
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,13 +129,17 @@ public class BluetoothService {
      * @param isToSelect true to select device / false to unselect.
      * @return the connection information.
      */
-    public Single<DeviceInformation> selectUnselectAndConnect(DeviceInformation device, DeviceType deviceType, boolean isToSelect) {
-        return connectionManager.selectUnselectDevice(device.getAddress(), deviceType, isToSelect)
-                .map(aBoolean -> device.toBuilder().isConnected(aBoolean).build())
-                .subscribeOn(Schedulers.io());
+    public Observable<Boolean> selectUnselectAndConnect(DeviceInformation device, DeviceType deviceType, boolean isToSelect) {
+        return connectionManager.selectUnselectDevice(device.getAddress(), deviceType, isToSelect);
     }
 
-    public Single<BluetoothSocket> getConnectionSocketFor(DeviceType deviceType) {
+    /**
+     * Retrieve the current socket for the requested device type.
+     *
+     * @param deviceType A device Type.
+     * @return the active Socket.
+     */
+    public Observable<BluetoothSocket> getConnectionSocketFor(DeviceType deviceType) {
         return connectionManager.getConnectionSocketFor(deviceType);
     }
 
