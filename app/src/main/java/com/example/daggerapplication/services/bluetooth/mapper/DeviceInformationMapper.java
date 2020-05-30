@@ -11,7 +11,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +20,7 @@ public abstract class DeviceInformationMapper {
 
     private HashMap<DeviceType, BluetoothSocket> socketMap;
 
-    public void setCurrentSockets(HashMap<DeviceType,BluetoothSocket> bluetoothSockets) {
+    public void setCurrentSockets(HashMap<DeviceType, BluetoothSocket> bluetoothSockets) {
         this.socketMap = bluetoothSockets;
     }
 

@@ -16,7 +16,6 @@ import com.example.daggerapplication.services.bluetooth.receiver.BroadcastReceiv
 
 import org.mapstruct.factory.Mappers;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -70,7 +69,7 @@ public class BluetoothService {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             appContext.startActivity(enableBtIntent);
             return BroadcastReceiverObservable.create(appContext, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
-                    .filter(intent -> intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED))
+                    .filter(intent -> intent.getAction() != null && intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED))
                     .map(intent -> intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR))
                     .map(code -> BluetoothState.fromCode(code));
         }
@@ -96,22 +95,17 @@ public class BluetoothService {
                 (devicesInfo, intent) -> {
                     // inspect what appears externally
                     final String action = intent.getAction();
-                    final ArrayList<DeviceInformation> devices = new ArrayList<>();
-                    if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
+                    if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
                         final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                         final BondState state = BondState.fromCode(intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1));
                         switch (state) {
                             case BOND_BONDED:
                                 final DeviceInformation newBonded = deviceInformationMapper.map(device);
-                                if (!devices.contains(newBonded)) {
-                                    devicesInfo.add(newBonded);
-                                }
+                                devicesInfo.add(newBonded);
                                 break;
                             case BOND_NONE:
                                 final DeviceInformation newNotBonded = deviceInformationMapper.map(device);
-                                if (devices.contains(newNotBonded)) {
-                                    devicesInfo.remove(newNotBonded);
-                                }
+                                devicesInfo.remove(newNotBonded);
                         }
                     }
                     return devicesInfo;

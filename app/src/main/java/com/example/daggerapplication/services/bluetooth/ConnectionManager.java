@@ -29,14 +29,10 @@ class ConnectionManager {
     private HashMap<DeviceType, BluetoothSocket> socketByDeviceType = new HashMap<>();
     private final SocketSetConnectionOnSubscribe socketSetPublisher = new SocketSetConnectionOnSubscribe();
 
-    private final
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // Threads and Observable declaration
-
     class SocketStateRunnable implements Runnable {
         @Override
         public void run() {
-            final ArrayList<BluetoothSocket> socketSet = new ArrayList(socketByDeviceType.values());
+            final ArrayList<BluetoothSocket> socketSet = new ArrayList<>(socketByDeviceType.values());
 
             for (BluetoothSocket inspected : socketSet) {
                 if (!inspected.isConnected()) {
@@ -59,12 +55,12 @@ class ConnectionManager {
             }
         }
 
-        public boolean isSubscribed() {
+        boolean isSubscribed() {
             return emitter != null;
         }
 
         @Override
-        public void subscribe(ObservableEmitter<HashMap<DeviceType, BluetoothSocket>> emitter) throws Exception {
+        public void subscribe(ObservableEmitter<HashMap<DeviceType, BluetoothSocket>> emitter) {
             this.emitter = emitter;
             emitter.onNext(socketByDeviceType);
         }
@@ -75,7 +71,6 @@ class ConnectionManager {
         private final BluetoothDevice device;
         private final ObservableEmitter<BluetoothSocket> emitter;
         private final DeviceType deviceType;
-        private BluetoothSocket socket;
 
         SocketConnectionThread(BluetoothDevice device, DeviceType deviceType, ObservableEmitter<BluetoothSocket> emitter) {
             this.device = device;
@@ -86,7 +81,7 @@ class ConnectionManager {
         public void run() {
             BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
             try {
-                socket = device.createRfcommSocketToServiceRecord(device.getUuids()[0].getUuid());
+                BluetoothSocket socket = device.createRfcommSocketToServiceRecord(device.getUuids()[0].getUuid());
                 socket.connect();
                 socketByDeviceType.put(deviceType, socket);
                 socketSetPublisher.fireUpdateSet();
@@ -149,7 +144,7 @@ class ConnectionManager {
             }
 
             if (isToSelect) {
-                Log.i(LOG_TAG, "Connect to device: " + address + "for device type:" + deviceType);
+                Log.i(LOG_TAG, "Connect to device: " + address + " for device type:" + deviceType);
                 return Observable.defer(() -> Observable.create(new SocketConnectionOnSubscribe(device, deviceType))
                         .subscribeOn(Schedulers.io()))
                         .map(bluetoothSocket -> bluetoothSocket.isConnected());

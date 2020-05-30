@@ -39,9 +39,4 @@ public class DeviceInformation {
     @Delegate(types = IncludedInformation.class)
     private BluetoothDevice device;
 
-
-    public BondState getBondState() {
-        return BondState.fromCode(device.getBondState());
-    }
-
 }

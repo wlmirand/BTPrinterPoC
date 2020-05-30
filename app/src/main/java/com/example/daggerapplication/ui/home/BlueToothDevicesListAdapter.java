@@ -3,6 +3,7 @@ package com.example.daggerapplication.ui.home;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,15 +27,48 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
 
     private final HomeViewModel viewModel;
     private List<DeviceInformation> dataList = new ArrayList<>();
+    private static OnClickListener onClickListener;
+
+    private static class OnClickListener {
+        private final HomeViewModel viewModel;
+        private List<DeviceInformation> dataList;
+
+        OnClickListener(HomeViewModel viewModel, List<DeviceInformation> dataList) {
+            this.viewModel = viewModel;
+            this.dataList = dataList;
+        }
+
+        void updateDate() {
+            this.dataList = dataList;
+        }
+
+        void onClick(View v, int adapterPosition) {
+            final boolean clicked = ((CompoundButton) v).isChecked();
+            final DeviceInformation deviceInformation = dataList.get(adapterPosition);
+
+            final Disposable disposable = viewModel.selectUnselectDevice(deviceInformation, DeviceType.PRINTER, clicked)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(isConnected -> {
+                        Toast.makeText(v.getContext(), deviceInformation.getName() + "[" + deviceInformation.getAddress() + "] " + (isConnected ? "CONNECTED" : "NOT CONNECTED"), Toast.LENGTH_LONG).show();
+                    }, throwable -> {
+                        Toast.makeText(v.getContext(), deviceInformation.getName() + "[" + deviceInformation.getAddress() + "] Not Connected", Toast.LENGTH_LONG).show();
+                    });
+            CompositeDisposable.add(disposable);
+        }
+    }
 
     static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView deviceName;
         Switch connection;
 
-        MyViewHolder(View v) {
+        MyViewHolder(View v, HomeViewModel viewModel, List<DeviceInformation> dataList) {
             super(v);
             deviceName = itemView.findViewById(R.id.btName);
             connection = itemView.findViewById(R.id.switch1);
+            connection.setOnClickListener(v1 -> {
+                onClickListener.onClick(v1, getAdapterPosition());
+            });
         }
     }
 
@@ -48,11 +82,12 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
                             final ArrayList<DeviceInformation> devices = new ArrayList<>();
                             devices.addAll(devicesInformation);
                             dataList = devices;
+                            onClickListener = new OnClickListener(viewModel, dataList);
                             notifyDataSetChanged();
                         },
                         throwable -> dataList.clear());
-
         CompositeDisposable.add(disposable);
+
     }
 
     @Override
@@ -66,27 +101,14 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
                                                                        int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.recycler_row, parent, false);
-        return new MyViewHolder(v);
+        return new MyViewHolder(v, viewModel, dataList);
     }
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
-
         final DeviceInformation data = dataList.get(position);
-
         holder.deviceName.setText(data.getName());
-        holder.connection.setOnCheckedChangeListener((buttonView, clicked) -> {
-            System.out.println(data);
-            final boolean isChecked = clicked;
-            buttonView.setChecked(!clicked);
-            final Disposable disposable = viewModel.selectUnselectDevice(dataList.get(position), DeviceType.PRINTER, isChecked)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(deviceInformation -> {
-                        Toast.makeText(buttonView.getContext(), data.getName() + "[" + data.getAddress() + "] Connected", Toast.LENGTH_LONG).show();
-                    }, throwable -> Toast.makeText(buttonView.getContext(), data.getName() + "[" + data.getAddress() + "] Not Connected", Toast.LENGTH_LONG).show());
-            CompositeDisposable.add(disposable);
-        });
+        holder.connection.setChecked(data.isConnected());
     }
 
     @Override

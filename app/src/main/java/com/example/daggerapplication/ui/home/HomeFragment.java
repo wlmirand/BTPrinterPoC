@@ -17,8 +17,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.daggerapplication.R;
 import com.example.daggerapplication.dagger.ViewModelFactory;
+import com.example.daggerapplication.services.printer.model.Charge;
+import com.example.daggerapplication.services.printer.model.DeliveryPrintableDocument;
+import com.example.daggerapplication.services.printer.model.NotDeliveredPrintableDocument;
+import com.example.daggerapplication.services.printer.model.PostalItem;
 import com.example.daggerapplication.services.printer.model.PrintableDocument;
 import com.example.daggerapplication.ui.CompositeDisposable;
+
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -108,10 +114,7 @@ public class HomeFragment extends DaggerFragment {
 
 
     private void onClickPrint(View v, TextView status) {
-        CompositeDisposable.add(viewModel.print(
-                PrintableDocument.builder()
-                        .title("A TITLE")
-                        .build()).subscribe(
+        CompositeDisposable.add(viewModel.print(fillDummyNotDeliveredPrintableDocument()).subscribe(
                 printStatus -> {
                     final int color;
                     status.setText(printStatus.getStatus().toString());
@@ -128,6 +131,81 @@ public class HomeFragment extends DaggerFragment {
                     status.setTextColor(color);
                 }
         ));
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    private PrintableDocument fillDummyDeliveryPrintableDocument() {
+        DeliveryPrintableDocument doc = new DeliveryPrintableDocument();
+        doc.setTotalAmount("100,00");
+        doc.setPaymentMethod("Credit Card");
+        doc.setPostalItems(new ArrayList<>());
+
+        PostalItem postalItem = new PostalItem();
+        postalItem.setId("postal Identifier 1");
+        doc.getPostalItems().add(postalItem);
+        Charge postalItemCharge = new Charge();
+        postalItemCharge.setAmount("10,00");
+        postalItemCharge.setCode("Big Tasty");
+        postalItem.setCharges(new ArrayList<>());
+        postalItem.getCharges().add(postalItemCharge);
+
+        postalItemCharge = new Charge();
+        postalItemCharge.setAmount("50,00");
+        postalItemCharge.setCode("Big Mac");
+        postalItem.getCharges().add(postalItemCharge);
+
+        postalItem = new PostalItem();
+        postalItem.setId("postal Identifier 2");
+        postalItem.setCharges(new ArrayList<>());
+        doc.getPostalItems().add(postalItem);
+        postalItemCharge = new Charge();
+        postalItemCharge.setAmount("10,00");
+        postalItemCharge.setCode("Double Cheese");
+        postalItem.getCharges().add(postalItemCharge);
+
+        postalItemCharge = new Charge();
+        postalItemCharge.setAmount("50,00");
+        postalItemCharge.setCode("Triple Hambuger");
+        postalItem.getCharges().add(postalItemCharge);
+
+        postalItem = new PostalItem();
+        postalItem.setId("postal Identifier 3");
+        postalItem.setCharges(new ArrayList<>());
+        doc.getPostalItems().add(postalItem);
+        postalItemCharge = new Charge();
+        postalItemCharge.setAmount("10,00");
+        postalItemCharge.setCode("Big Tasty");
+        postalItem.getCharges().add(postalItemCharge);
+
+        postalItemCharge = new Charge();
+        postalItemCharge.setAmount("50,00");
+        postalItemCharge.setCode("Big Mac");
+        postalItem.getCharges().add(postalItemCharge);
+
+        return doc;
+    }
+
+    private PrintableDocument fillDummyNotDeliveredPrintableDocument() {
+        NotDeliveredPrintableDocument doc = new NotDeliveredPrintableDocument();
+
+        doc.setId("AnID001");
+        doc.setPickUpPointName("La muraille de chine");
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.add("Lun 10:00 - 23:00");
+        arrayList.add("Ven 11:00 - 22:30");
+        doc.setPickupPointOpeningHours(arrayList);
+
+        doc.setProductTypeName("TV Sony Bravia");
+        doc.setRecipientAddress("Rue du moulin");
+        doc.setRecipientCity("Paris");
+        doc.setRecipientName("VITALI");
+        doc.setRecipientPostCode("75000");
+        doc.setRetentionPeriod(10);
+        doc.setSumOfCharges("15555,55");
+
+        return doc;
     }
 
 }

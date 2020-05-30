@@ -1,0 +1,22 @@
+$ESC_ALIGN_LEFT<LOGO>$ESC_ALIGN_CENTER$TITLE_STYLE$delivery_title
+$NORMAL_STYLE$ESC_ALIGN_LEFT
+
+ $delivery_date_time $currentDateTime
+
+
+#foreach( $postalItem in $deliveryPrintableDocument.postalItems )
+#foreach( $charge in $postalItem.charges )
+$postalItem.id $delivery_receipt_symbol $charge.code
+    $charge.amount
+#end
+#end
+
+$delivery_total_amount
+    $deliveryPrintableDocument.totalAmount
+
+$delivery_payment_method
+    $deliveryPrintableDocument.paymentMethod
+
+
+
+

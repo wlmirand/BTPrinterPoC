@@ -1,13 +1,14 @@
 package com.example.daggerapplication.services.printer;
 
-import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 import com.example.daggerapplication.services.bluetooth.BluetoothService;
 import com.example.daggerapplication.services.bluetooth.model.DeviceType;
 import com.example.daggerapplication.services.printer.model.PrintStatus;
 import com.example.daggerapplication.services.printer.model.PrintableDocument;
-import com.example.daggerapplication.services.printer.util.PrinterCommands;
+import com.example.daggerapplication.services.printer.template.TemplateProcessor;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -21,6 +22,7 @@ public class PrinterService {
 
     private static final String LOG_TAG = "PrinterService";
     private final BluetoothService bluetoothService;
+    private final TemplateProcessor templateManger;
 
     private class PrinterStatusObserver implements ObservableOnSubscribe<PrintStatus> {
 
@@ -37,39 +39,12 @@ public class PrinterService {
                     .subscribe(
                             outputStream -> {
                                 emitter.onNext(PrintStatus.builder().status(PrintStatus.Status.STARTED).build());
-                                byte[] printout = {0x1B, 0x21, 1};
-                                outputStream.write(printout);
-                                outputStream.write(PrinterCommands.ESC_ALIGN_LEFT);
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
-                                outputStream.write("TEST TEST TEST SIMPLE\n".getBytes());
+
+                                final List<byte[]> fullDocAsByteArray = templateManger.fillsPrintableDocument(document);
+
+                                for (byte[] currentData : fullDocAsByteArray) {
+                                    outputStream.write(currentData);
+                                }
 
                                 outputStream.flush();
                                 emitter.onNext(PrintStatus.builder().status(PrintStatus.Status.SUCCESS).build());
@@ -81,15 +56,16 @@ public class PrinterService {
         }
     }
 
+
     @Inject
-    PrinterService(BluetoothService bluetoothService) {
+    PrinterService(BluetoothService bluetoothService, TemplateProcessor templateManager) {
         this.bluetoothService = bluetoothService;
+        this.templateManger = templateManager;
     }
 
-    public Observable<PrintStatus> print(final PrintableDocument document) {
-//        return Observable.defer(() -> Observable.create(new PrinterStatusObserver(document))
-//                .observeOn(AndroidSchedulers.mainThread()));
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public Observable<PrintStatus> print(final PrintableDocument document) {
         return Observable.create(new PrinterStatusObserver(document))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io());
