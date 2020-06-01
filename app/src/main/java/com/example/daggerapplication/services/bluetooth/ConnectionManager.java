@@ -9,11 +9,7 @@ import com.example.daggerapplication.services.bluetooth.model.DeviceInformation;
 import com.example.daggerapplication.services.bluetooth.model.DeviceType;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,7 +17,6 @@ import javax.inject.Singleton;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.schedulers.Schedulers;
 
 @Singleton
 class ConnectionManager {
@@ -29,23 +24,6 @@ class ConnectionManager {
     private static final String LOG_TAG = ConnectionManager.class.getSimpleName();
     private HashMap<DeviceType, BluetoothSocket> socketByDeviceType = new HashMap<>();
     private final SocketSetConnectionOnSubscribe socketSetPublisher = new SocketSetConnectionOnSubscribe();
-
-    class SocketStateRunnable implements Runnable {
-        @Override
-        public void run() {
-            final ArrayList<BluetoothSocket> socketSet = new ArrayList<>(socketByDeviceType.values());
-
-            for (BluetoothSocket inspected : socketSet) {
-                if (!inspected.isConnected()) {
-                    // remove
-                    socketSet.remove(inspected);
-                    if (socketSetPublisher.isSubscribed()) {
-                        socketSetPublisher.fireUpdateSet();
-                    }
-                }
-            }
-        }
-    }
 
     class SocketSetConnectionOnSubscribe implements ObservableOnSubscribe<HashMap<DeviceType, BluetoothSocket>> {
         private ObservableEmitter<HashMap<DeviceType, BluetoothSocket>> emitter;
@@ -56,43 +34,10 @@ class ConnectionManager {
             }
         }
 
-        boolean isSubscribed() {
-            return emitter != null;
-        }
-
         @Override
         public void subscribe(ObservableEmitter<HashMap<DeviceType, BluetoothSocket>> emitter) {
             this.emitter = emitter;
             emitter.onNext(socketByDeviceType);
-        }
-    }
-
-    private class SocketConnectionThread extends Thread implements Runnable {
-
-        private final BluetoothDevice device;
-        private final ObservableEmitter<BluetoothSocket> emitter;
-        private final DeviceType deviceType;
-
-        SocketConnectionThread(BluetoothDevice device, DeviceType deviceType, ObservableEmitter<BluetoothSocket> emitter) {
-            this.device = device;
-            this.deviceType = deviceType;
-            this.emitter = emitter;
-        }
-
-        public void run() {
-            BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
-            try {
-                BluetoothSocket socket = device.createRfcommSocketToServiceRecord(device.getUuids()[0].getUuid());
-                socket.connect();
-                socketByDeviceType.put(deviceType, socket);
-                socketSetPublisher.fireUpdateSet();
-                emitter.onNext(socket);
-                emitter.onComplete();
-                Log.i(LOG_TAG, "The device " + device.getName() + "[" + device.getAddress() + "] has been successfully connected for device type: " + deviceType);
-            } catch (IOException connectException) {
-                Log.e(LOG_TAG, "Unable to connect on device: " + device.getName() + "[" + device.getAddress() + "]");
-                emitter.onError(new Throwable("Unable to connect on device: " + device.getName() + "[" + device.getAddress() + "]"));
-            }
         }
     }
 
@@ -127,11 +72,6 @@ class ConnectionManager {
 
     @Inject
     ConnectionManager() {
-        final ScheduledExecutorService executor = Executors
-                .newScheduledThreadPool(2);
-        final Runnable socketStateCheck = new SocketStateRunnable();
-
-        executor.scheduleAtFixedRate(socketStateCheck, 10, 10, TimeUnit.SECONDS);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,9 +98,7 @@ class ConnectionManager {
                 socket.close();
             }
             Log.i(LOG_TAG, "Connect to device: " + address + " for device type:" + deviceType);
-            return Observable.create(new SocketConnectionOnSubscribe(device, deviceType))
-                    //.subscribeOn(Schedulers.io());
-            ;
+            return Observable.create(new SocketConnectionOnSubscribe(device, deviceType));
         } catch (IOException e) {
             Log.e(LOG_TAG, "Unable to select the device with address: " + address);
             return Observable.error(e);
