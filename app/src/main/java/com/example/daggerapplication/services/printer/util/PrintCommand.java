@@ -20,10 +20,6 @@ public enum PrintCommand {
         this.bytes = bytes;
     }
 
-    public String toStringValue() {
-        return new String(this.bytes);
-    }
-
     public byte[] toBytes() {
         return bytes;
     }
