@@ -25,6 +25,7 @@ import javax.inject.Singleton;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 @Singleton
@@ -36,6 +37,7 @@ public class BluetoothService {
     private final BluetoothAdapter btAdapter;
     private final ConnectionManager connectionManager;
     private final DeviceInformationMapper deviceInformationMapper;
+    private Disposable activationDisposable;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -66,15 +68,20 @@ public class BluetoothService {
 
     private boolean activate() {
         if (isAvailable() && !isActivated()) {
+            if (activationDisposable != null) {
+                CompositeDisposable.clearDisposable(activationDisposable);
+            }
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             appContext.startActivity(enableBtIntent);
-            final BluetoothState state = BroadcastReceiverObservable.create(appContext, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
+            activationDisposable = BroadcastReceiverObservable.create(appContext, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
                     .filter(intent -> intent.getAction() != null && intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED))
                     .map(intent -> intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR))
                     .map(code -> BluetoothState.fromCode(code))
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
-                    .blockingLast();
+                    .subscribe(bluetoothState -> Log.i(TAG_LOG, "Bluetooth Activated")
+                            , throwable -> Log.e(TAG_LOG, "Error on bluetooth activation"));
+            CompositeDisposable.add(activationDisposable);
         }
         return isActivated();
     }
