@@ -9,12 +9,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.daggerapplication.R;
 import com.example.daggerapplication.services.bluetooth.model.DeviceInformation;
 import com.example.daggerapplication.services.bluetooth.model.DeviceType;
-import com.example.daggerapplication.ui.CompositeDisposable;
+import com.example.daggerapplication.services.common.CompositeDisposable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,35 +27,25 @@ import io.reactivex.schedulers.Schedulers;
 public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothDevicesListAdapter.MyViewHolder> {
 
     private final HomeViewModel viewModel;
-    private List<DeviceInformation> dataList = new ArrayList<>();
+    private List<DeviceInformation> dataList;
     private static OnClickListener onClickListener;
 
     private static class OnClickListener {
         private final HomeViewModel viewModel;
         private List<DeviceInformation> dataList;
 
-        OnClickListener(HomeViewModel viewModel, List<DeviceInformation> dataList) {
+        OnClickListener(HomeViewModel viewModel) {
             this.viewModel = viewModel;
-            this.dataList = dataList;
-        }
-
-        void updateDate() {
-            this.dataList = dataList;
         }
 
         void onClick(View v, int adapterPosition) {
             final boolean clicked = ((CompoundButton) v).isChecked();
             final DeviceInformation deviceInformation = dataList.get(adapterPosition);
+            viewModel.selectPrinter(deviceInformation);
+        }
 
-            final Disposable disposable = viewModel.selectUnselectDevice(deviceInformation, DeviceType.PRINTER, clicked)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(isConnected -> {
-                        Toast.makeText(v.getContext(), deviceInformation.getName() + "[" + deviceInformation.getAddress() + "] " + (isConnected ? "CONNECTED" : "NOT CONNECTED"), Toast.LENGTH_LONG).show();
-                    }, throwable -> {
-                        Toast.makeText(v.getContext(), deviceInformation.getName() + "[" + deviceInformation.getAddress() + "] Not Connected", Toast.LENGTH_LONG).show();
-                    });
-            CompositeDisposable.add(disposable);
+        void updateDataList(List<DeviceInformation> updatedData) {
+            this.dataList = updatedData;
         }
     }
 
@@ -62,32 +53,18 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
         TextView deviceName;
         Switch connection;
 
-        MyViewHolder(View v, HomeViewModel viewModel, List<DeviceInformation> dataList) {
+        MyViewHolder(View v, HomeViewModel viewModel) {
             super(v);
             deviceName = itemView.findViewById(R.id.btName);
             connection = itemView.findViewById(R.id.switch1);
-            connection.setOnClickListener(v1 -> {
-                onClickListener.onClick(v1, getAdapterPosition());
-            });
+            connection.setOnClickListener(v1 -> onClickListener.onClick(v1, getAdapterPosition()));
         }
     }
 
     BlueToothDevicesListAdapter(HomeViewModel viewModel) {
         this.viewModel = viewModel;
-        Disposable disposable = viewModel.getDevicesInformation()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(
-                        devicesInformation -> {
-                            final ArrayList<DeviceInformation> devices = new ArrayList<>();
-                            devices.addAll(devicesInformation);
-                            dataList = devices;
-                            onClickListener = new OnClickListener(viewModel, dataList);
-                            notifyDataSetChanged();
-                        },
-                        throwable -> dataList.clear());
-        CompositeDisposable.add(disposable);
-
+        this.dataList = new ArrayList<>();
+        onClickListener = new OnClickListener(viewModel);
     }
 
     @Override
@@ -101,7 +78,7 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
                                                                        int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.recycler_row, parent, false);
-        return new MyViewHolder(v, viewModel, dataList);
+        return new MyViewHolder(v, viewModel);
     }
 
     @Override
@@ -114,5 +91,11 @@ public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothD
     @Override
     public int getItemCount() {
         return dataList != null ? dataList.size() : 0;
+    }
+
+    void updateDataList(List<DeviceInformation> dataList) {
+        this.dataList = dataList;
+        onClickListener.updateDataList(dataList);
+        notifyDataSetChanged();
     }
 }

@@ -9,10 +9,12 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-class BitmapUtil {
+public class BitmapUtil {
 
     private static final String ABCDEF = "0123456789ABCDEF";
     private static String[] binaryArray = {"0000", "0001", "0010", "0011",
@@ -21,7 +23,7 @@ class BitmapUtil {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static byte[] createBarcode(String text) {
+    public static byte[] createBarcode(String text) {
         MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
         try {
             BitMatrix bitMatrix = multiFormatWriter.encode(text, BarcodeFormat.CODE_128, 400, 100);
@@ -33,7 +35,7 @@ class BitmapUtil {
         }
     }
 
-    static byte[] decodeBitmap(Bitmap bmp) {
+    public static byte[] decodeBitmap(Bitmap bmp) {
         int bmpWidth = bmp.getWidth();
         int bmpHeight = bmp.getHeight();
 
@@ -173,4 +175,40 @@ class BitmapUtil {
     private static byte charToByte(char c) {
         return (byte) ABCDEF.indexOf(c);
     }
+
+    private static final Charset DEFAULT_CHARSET;
+    private static final char[] DIGITS_LOWER;
+    private static final char[] DIGITS_UPPER;
+
+    static {
+        DEFAULT_CHARSET = StandardCharsets.UTF_8;
+        DIGITS_LOWER = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        DIGITS_UPPER = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    }
+
+    public static String encodeHexString(byte[] data) {
+        return new String(encodeHex(data));
+    }
+
+    private static char[] encodeHex(byte[] data) {
+        return encodeHex(data, true);
+    }
+
+    private static char[] encodeHex(byte[] data, boolean toLowerCase) {
+        return encodeHex(data, toLowerCase ? DIGITS_LOWER : DIGITS_UPPER);
+    }
+
+    private static char[] encodeHex(byte[] data, char[] toDigits) {
+        int l = data.length;
+        char[] out = new char[l << 1];
+        int i = 0;
+
+        for (int var5 = 0; i < l; ++i) {
+            out[var5++] = toDigits[(240 & data[i]) >>> 4];
+            out[var5++] = toDigits[15 & data[i]];
+        }
+
+        return out;
+    }
+
 }

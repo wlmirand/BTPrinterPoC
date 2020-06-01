@@ -23,6 +23,11 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/../../boulot_delivery/delivery2/Mail/DeliveryApp/app/src/main/java/com/upu/deliveryapp/screenNotDelivered/viewmodel/NotDeliveredViewModel.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/app/build.gradle">
           <value>
             <set />
@@ -158,6 +163,11 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/bluetooth/exception/BluetoothException.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/bluetooth/exception/DeviceAlreadyConnectedException.java">
           <value>
             <set />
@@ -258,12 +268,47 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/common/CompositeDisposable.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/PrintCommands.java">
           <value>
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/PrintableBuilder.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/PrintableBuilderImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/PrintablePlanBuilder.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/PrinterService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/builder/PrintableBuilder.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/builder/PrintableBuilderImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/exception/PrintException.java">
           <value>
             <set />
           </value>
@@ -299,6 +344,16 @@
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/model/PrintableDocument.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/model/PrintableExecutorPlan.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/app/src/main/java/com/example/daggerapplication/services/printer/model/PrintablePlanBuilder.java">
           <value>
             <set />
           </value>

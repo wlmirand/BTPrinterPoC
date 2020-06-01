@@ -6,13 +6,15 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
+import com.example.daggerapplication.services.bluetooth.exception.BluetoothException;
 import com.example.daggerapplication.services.bluetooth.mapper.DeviceInformationMapper;
 import com.example.daggerapplication.services.bluetooth.model.BluetoothState;
 import com.example.daggerapplication.services.bluetooth.model.BondState;
 import com.example.daggerapplication.services.bluetooth.model.DeviceInformation;
-import com.example.daggerapplication.services.bluetooth.model.DeviceType;
 import com.example.daggerapplication.services.bluetooth.receiver.BroadcastReceiverObservable;
+import com.example.daggerapplication.services.common.CompositeDisposable;
 
 import org.mapstruct.factory.Mappers;
 
@@ -22,10 +24,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 @Singleton
 public class BluetoothService {
+
+    private final static String TAG_LOG = BluetoothService.class.getSimpleName();
 
     private final Context appContext;
     private final BluetoothAdapter btAdapter;
@@ -59,27 +64,34 @@ public class BluetoothService {
         return isAvailable() && btAdapter.isEnabled();
     }
 
-    /**
-     * Activate the bluetooth.<br>
-     *
-     * @return Observable on Bluetooth State (disposable).
-     */
-    public Observable<BluetoothState> activate() {
+    private boolean activate() {
         if (isAvailable() && !isActivated()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             appContext.startActivity(enableBtIntent);
-            return BroadcastReceiverObservable.create(appContext, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
+            final BluetoothState state = BroadcastReceiverObservable.create(appContext, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
                     .filter(intent -> intent.getAction() != null && intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED))
                     .map(intent -> intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR))
-                    .map(code -> BluetoothState.fromCode(code));
+                    .map(code -> BluetoothState.fromCode(code))
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .blockingLast();
         }
-        return Observable.just(BluetoothState.ON).subscribeOn(Schedulers.io());
+        return isActivated();
     }
 
     /**
      * @return Observable on bonded Devices Information (disposable)
      */
     public Observable<Set<DeviceInformation>> getDevicesInformation() {
+
+        if (!isAvailable()) {
+            return Observable.error(new BluetoothException("Bluetooth is not Available on this device"));
+        }
+
+        if (!isActivated() && !activate()) {
+            return Observable.error(new BluetoothException("Bluetooth fails to activate"));
+        }
+
         final Observable<Set<DeviceInformation>> observerCurrentSockets = connectionManager.getBluetoothSockets()
                 .map(bluetoothSockets -> {
                     final Set<BluetoothDevice> bondedDevices = btAdapter.getBondedDevices();
@@ -112,29 +124,31 @@ public class BluetoothService {
                 }).subscribeOn(Schedulers.io());
     }
 
+    public void clean() {
+        CompositeDisposable.clear();
+        Log.i(TAG_LOG, "Bean cleaned");
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///// DELEGATED TO CONNECTION MANAGER
 
     /**
-     * Select a device for a type of device.
-     *
-     * @param device     the device on select and connect / unselect and eventually disconnect.
-     * @param deviceType the device type.
-     * @param isToSelect true to select device / false to unselect.
-     * @return the connection information.
-     */
-    public Observable<Boolean> selectUnselectAndConnect(DeviceInformation device, DeviceType deviceType, boolean isToSelect) {
-        return connectionManager.selectUnselectDevice(device.getAddress(), deviceType, isToSelect);
-    }
-
-    /**
      * Retrieve the current socket for the requested device type.
      *
-     * @param deviceType A device Type.
+     * @param device the device.
      * @return the active Socket.
      */
-    public Observable<BluetoothSocket> getConnectionSocketFor(DeviceType deviceType) {
-        return connectionManager.getConnectionSocketFor(deviceType);
+    public Observable<BluetoothSocket> getConnectionSocketFor(DeviceInformation device) {
+
+        if (!isAvailable()) {
+            return Observable.error(new BluetoothException("Bluetooth is not Available on this device"));
+        }
+
+        if (!isActivated() && !activate()) {
+            return Observable.error(new BluetoothException("Bluetooth fails to activate"));
+        }
+
+        return connectionManager.getConnectionSocketFor(device);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

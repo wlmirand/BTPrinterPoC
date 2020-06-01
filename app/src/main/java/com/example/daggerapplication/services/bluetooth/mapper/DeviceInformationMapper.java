@@ -1,5 +1,6 @@
 package com.example.daggerapplication.services.bluetooth.mapper;
 
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
@@ -30,9 +31,13 @@ public abstract class DeviceInformationMapper {
         return map(BluetoothDeviceWrapper.builder().device(device).build());
     }
 
+    protected DeviceType mapToType(BluetoothClass bluetoothClass) {
+        return DeviceType.fromCode(bluetoothClass.getDeviceClass());
+    }
+
     @Mapping(target = "device", source = "device")
     @Mapping(target = "connected", ignore = true)
-    @Mapping(target = "selectedDevice", ignore = true)
+    @Mapping(target = "deviceType", source = "device.bluetoothClass")
     abstract DeviceInformation map(BluetoothDeviceWrapper deviceWrapper);
 
     @AfterMapping
@@ -40,14 +45,11 @@ public abstract class DeviceInformationMapper {
         if (socketMap != null && socketMap.size() > 0) {
             for (Map.Entry<DeviceType, BluetoothSocket> currentConsideredEntry : socketMap.entrySet()) {
                 final BluetoothSocket socket = currentConsideredEntry.getValue();
-                final DeviceType deviceType = currentConsideredEntry.getKey();
 
                 if (socket.getRemoteDevice().getAddress().equals(target.getAddress())) {
                     target.setConnected(socket.isConnected());
-                    target.setSelectedDevice(deviceType);
                 } else {
                     target.setConnected(Boolean.FALSE);
-                    target.setSelectedDevice(DeviceType.NONE);
                 }
             }
         }

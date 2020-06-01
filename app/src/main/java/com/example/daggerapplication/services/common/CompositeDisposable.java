@@ -1,4 +1,4 @@
-package com.example.daggerapplication.ui;
+package com.example.daggerapplication.services.common;
 
 import io.reactivex.disposables.Disposable;
 
@@ -14,4 +14,7 @@ public class CompositeDisposable {
         compositeDisposable.clear();
     }
 
+    public static void clearDisposable(Disposable disposable) {
+        compositeDisposable.remove(disposable);
+    }
 }

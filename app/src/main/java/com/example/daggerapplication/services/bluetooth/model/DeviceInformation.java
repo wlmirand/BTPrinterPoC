@@ -1,5 +1,6 @@
 package com.example.daggerapplication.services.bluetooth.model;
 
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 
 import lombok.AccessLevel;
@@ -31,12 +32,13 @@ public class DeviceInformation {
 
     @EqualsAndHashCode.Exclude
     @Setter
-    private DeviceType selectedDevice;
+    private DeviceType deviceType;
 
 
     @Getter(AccessLevel.NONE)
     @Setter
     @Delegate(types = IncludedInformation.class)
     private BluetoothDevice device;
+
 
 }

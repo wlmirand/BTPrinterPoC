@@ -2,16 +2,13 @@
     <string name="app_name">BlueTooth &amp; Printer</string>
 
     <string name="print_delivery_notification_card_title">ATTEMPTED DELIVERY NOTIFICATION</string>
-    <string name="print_delivery_notification_card_content_one_on">On</string>
-    <string name="print_delivery_notification_card_content_one_at">At</string>
-    <string name="print_delivery_notification_card_content_one">we attempted the delivery of the following shipment, but we could not find you. Please follow the instructions below to collect your shipment.</string>
+    <string name="print_delivery_notification_card_content_one">On %1$s at %2$s we attempted the delivery of the following shipment, but we could not find you. Please follow the instructions below to collect your shipment.</string>
     <string name="print_delivery_notification_card_shipment">Shipment</string>
     <string name="print_delivery_notification_card_type">type:</string>
     <string name="print_delivery_notification_card_recipient">Recipient:</string>
     <string name="print_delivery_notification_card_delivery">Delivery</string>
     <string name="print_delivery_notification_card_charges">charges:</string>
-    <string name="print_delivery_notification_card_retention_period_days">days:</string>
-    <string name="print_delivery_notification_card_retention_period">You can collect the shipment at following pick-up point within the next </string>
+    <string name="print_delivery_notification_card_retention_period">You can collect the shipment at following pick-up point within the next %d days:</string>
     <string name="print_delivery_notification_card_remember">Please remember to bring with you an identification document.</string>
 
     <string name="print_delivery_charges_payment_receipt_title">DELIVERY CHARGES PAYMENT RECEIPT</string>

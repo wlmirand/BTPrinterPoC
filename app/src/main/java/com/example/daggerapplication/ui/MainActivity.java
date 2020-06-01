@@ -3,6 +3,7 @@ package com.example.daggerapplication.ui;
 import android.os.Bundle;
 
 import com.example.daggerapplication.R;
+import com.example.daggerapplication.services.common.CompositeDisposable;
 import com.example.daggerapplication.ui.home.HomeFragment;
 
 import dagger.android.support.DaggerAppCompatActivity;

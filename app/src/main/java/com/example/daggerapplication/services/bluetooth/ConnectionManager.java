@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.example.daggerapplication.services.bluetooth.model.DeviceInformation;
 import com.example.daggerapplication.services.bluetooth.model.DeviceType;
 
 import java.io.IOException;
@@ -106,8 +107,19 @@ class ConnectionManager {
 
         @Override
         public void subscribe(ObservableEmitter<BluetoothSocket> emitter) {
-            SocketConnectionThread socketConnectionThread = new SocketConnectionThread(device, deviceType, emitter);
-            socketConnectionThread.start();
+            BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+            try {
+                BluetoothSocket socket = device.createRfcommSocketToServiceRecord(device.getUuids()[0].getUuid());
+                socket.connect();
+                socketByDeviceType.put(deviceType, socket);
+                socketSetPublisher.fireUpdateSet();
+                emitter.onNext(socket);
+                emitter.onComplete();
+                Log.i(LOG_TAG, "The device " + device.getName() + "[" + device.getAddress() + "] has been successfully connected for device type: " + deviceType);
+            } catch (IOException connectException) {
+                Log.e(LOG_TAG, "Unable to connect on device: " + device.getName() + "[" + device.getAddress() + "]");
+                emitter.onError(new Throwable("Unable to connect on device: " + device.getName() + "[" + device.getAddress() + "]"));
+            }
         }
     }
 
@@ -124,16 +136,19 @@ class ConnectionManager {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public void clean() {
+        Log.i(LOG_TAG, "Bean cleaned");
+    }
+
     /**
-     * Select/Unselect the requested device (identified by MAD Address) for the device type.<br>
+     * Select the requested device (identified by MAD Address) for the device type.<br>
      * A connection is performed on device and stored.
      *
      * @param address    the device MAC address.
      * @param deviceType the device type for which the connection is required.
-     * @param isToSelect true to select a device, false to remove it.
      * @return the connection status.
      */
-    Observable<Boolean> selectUnselectDevice(String address, DeviceType deviceType, boolean isToSelect) {
+    private Observable<BluetoothSocket> select(String address, DeviceType deviceType) {
         try {
             final BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address);
             final BluetoothSocket socket = socketByDeviceType.remove(deviceType);
@@ -142,38 +157,31 @@ class ConnectionManager {
                 Log.i(LOG_TAG, "Socket closed for device: " + address + " of device type: " + deviceType);
                 socket.close();
             }
-
-            if (isToSelect) {
-                Log.i(LOG_TAG, "Connect to device: " + address + " for device type:" + deviceType);
-                return Observable.defer(() -> Observable.create(new SocketConnectionOnSubscribe(device, deviceType))
-                        .subscribeOn(Schedulers.io()))
-                        .map(bluetoothSocket -> bluetoothSocket.isConnected());
-            }
+            Log.i(LOG_TAG, "Connect to device: " + address + " for device type:" + deviceType);
+            return Observable.create(new SocketConnectionOnSubscribe(device, deviceType))
+                    //.subscribeOn(Schedulers.io());
+            ;
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Unable to select/unselect the device with address: " + address);
+            Log.e(LOG_TAG, "Unable to select the device with address: " + address);
             return Observable.error(e);
         }
-
-        return Observable.just(Boolean.FALSE);
     }
 
     /**
-     * @param deviceType The device type.
-     * @return A one element observable socket
+     * @param device The device to retrieve socket from.
+     * @return a socket for the requested device.
      */
-    Observable<BluetoothSocket> getConnectionSocketFor(DeviceType deviceType) {
-        if (socketByDeviceType.containsKey(deviceType)) {
-            final BluetoothSocket socket = socketByDeviceType.get(deviceType);
-            if (socket != null && socket.isConnected()) {
-                return Observable.just(socket);
-            } else {
-                Log.i(LOG_TAG, "Socket not connected - Retry for device " + socket.getRemoteDevice().getName() + "[" + socket.getRemoteDevice().getAddress() + "]");
-                return Observable.defer(() -> Observable.create(new SocketConnectionOnSubscribe(socket.getRemoteDevice(), deviceType))).retry(3);
+    Observable<BluetoothSocket> getConnectionSocketFor(DeviceInformation device) {
+        if (socketByDeviceType.containsKey(device.getDeviceType())) {
+            final BluetoothSocket socket = socketByDeviceType.get(device.getDeviceType());
+            if (socket != null) {
+                final String currentSelectedAddress = socket.getRemoteDevice().getAddress();
+                if (currentSelectedAddress.equals(device.getAddress()) && socket.isConnected()) {
+                    return Observable.just(socket);
+                }
             }
-        } else {
-            Log.e(LOG_TAG, "No Device Selected for type : " + deviceType);
-            return Observable.error(new Throwable("No device selected for type: " + deviceType));
         }
+        return select(device.getAddress(), device.getDeviceType());
     }
 
     Observable<HashMap<DeviceType, BluetoothSocket>> getBluetoothSockets() {
