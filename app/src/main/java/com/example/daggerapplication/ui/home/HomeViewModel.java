@@ -6,14 +6,15 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.daggerapplication.R;
-import com.example.daggerapplication.services.bluetooth.BluetoothService;
-import com.example.daggerapplication.services.bluetooth.model.DeviceInformation;
-import com.example.daggerapplication.services.printer.PrinterService;
-import com.example.daggerapplication.services.printer.builder.PrintableBuilder;
-import com.example.daggerapplication.services.printer.exception.PrintException;
-import com.example.daggerapplication.services.printer.model.PrintStatus;
-import com.example.daggerapplication.services.printer.model.PrintableDocument;
-import com.example.daggerapplication.services.printer.util.PrintCommand;
+
+import org.universalpostalunion.printerlibrary.bluetooth.BluetoothService;
+import org.universalpostalunion.printerlibrary.bluetooth.model.DeviceInformation;
+import org.universalpostalunion.printerlibrary.printer.PrinterService;
+import org.universalpostalunion.printerlibrary.printer.builder.PrintableBuilder;
+import org.universalpostalunion.printerlibrary.printer.exception.PrintException;
+import org.universalpostalunion.printerlibrary.printer.model.PrintStatus;
+import org.universalpostalunion.printerlibrary.printer.model.PrintableDocument;
+import org.universalpostalunion.printerlibrary.printer.util.PrintCommand;
 
 import java.util.Calendar;
 import java.util.List;

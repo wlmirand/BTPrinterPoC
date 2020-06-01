@@ -18,7 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.daggerapplication.R;
 import com.example.daggerapplication.dagger.ViewModelFactory;
-import com.example.daggerapplication.services.bluetooth.model.DeviceInformation;
+
+import org.universalpostalunion.printerlibrary.bluetooth.model.DeviceInformation;
 
 import java.util.List;
 

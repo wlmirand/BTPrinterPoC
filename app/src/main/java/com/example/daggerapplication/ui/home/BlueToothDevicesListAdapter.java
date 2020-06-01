@@ -6,23 +6,16 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.daggerapplication.R;
-import com.example.daggerapplication.services.bluetooth.model.DeviceInformation;
-import com.example.daggerapplication.services.bluetooth.model.DeviceType;
-import com.example.daggerapplication.services.common.CompositeDisposable;
+
+import org.universalpostalunion.printerlibrary.bluetooth.model.DeviceInformation;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class BlueToothDevicesListAdapter extends RecyclerView.Adapter<BlueToothDevicesListAdapter.MyViewHolder> {
 

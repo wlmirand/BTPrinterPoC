@@ -6,6 +6,8 @@ import com.example.daggerapplication.dagger.module.ActivityBindingModule;
 import com.example.daggerapplication.dagger.module.ContextModule;
 import com.example.daggerapplication.dagger.module.ViewModelModule;
 
+import org.universalpostalunion.printerlibrary.dagger.BluetoothModule;
+
 import javax.inject.Singleton;
 
 import dagger.BindsInstance;
@@ -23,7 +25,8 @@ import dagger.android.support.AndroidSupportInjectionModule;
                 AndroidSupportInjectionModule.class,
                 ContextModule.class,
                 ViewModelModule.class,
-                ActivityBindingModule.class
+                ActivityBindingModule.class,
+                BluetoothModule.class
         }
 )
 public interface ApplicationComponent extends AndroidInjector<DaggerApplication> {
