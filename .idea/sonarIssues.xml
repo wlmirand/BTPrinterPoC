@@ -18,12 +18,22 @@
             <set />
           </value>
         </entry>
+        <entry key="D:/citizenExamples/V1.088E/Android_ESCP/app/src/main/java/com/citizen/app/assist/ESCPSample3.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/../../boulot_delivery/delivery2/Mail/DeliveryApp/app/src/main/java/com/upu/deliveryapp/printer/Utils.java">
           <value>
             <set />
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/../../boulot_delivery/delivery2/Mail/DeliveryApp/app/src/main/java/com/upu/deliveryapp/screenNotDelivered/viewmodel/NotDeliveredViewModel.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../Android_CPCL/app/src/main/java/com/citizen/app/assist/CPCLSample2.java">
           <value>
             <set />
           </value>
@@ -494,6 +504,111 @@
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/build.gradle">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/build.gradle">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/PrinterService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/builder/PrintableBuilder.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/builder/PrintableBuilderImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/escpos/ESCPOS.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/escpos/ESCPOSByteArrayBuffer.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/escpos/ESCPOSByteArrayOutputStream.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/escpos/ESCPOSConstant.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/escpos/ESCPOSHelper.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/escpos/ESCPOSUtil.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/escpos/ESCPos.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/escpos/ESCPosConstant.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/escpos/OLEPOSCommand.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/escpos/OLEPOSCommandUtil.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/util/BitmapUtil.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/util/ESCPOSUtil.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/util/ESCPos.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/util/ImageLoader.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/util/MobileImageConverter.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/util/OLEPOSCommand.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/printerlibrary/src/main/java/org/universalpostalunion/printerlibrary/printer/util/PrintUtil.java">
           <value>
             <set />
           </value>

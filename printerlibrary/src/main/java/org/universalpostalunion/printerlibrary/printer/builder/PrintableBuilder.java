@@ -1,31 +1,33 @@
 package org.universalpostalunion.printerlibrary.printer.builder;
 
+import android.graphics.Typeface;
+
+import org.universalpostalunion.printerlibrary.printer.escpos.ESCPOSConstant;
 import org.universalpostalunion.printerlibrary.printer.model.PrintableDocument;
 import org.universalpostalunion.printerlibrary.printer.util.PrintCommand;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 public interface PrintableBuilder {
 
-    void printPhoto(int resourceId, PrintCommand alignment) throws Exception;
+    void configure(Charset charset) throws IOException;
 
-    void print(String text, PrintCommand... style) throws IOException;
+    void setBold(boolean isActive);
 
-    void printLine(String line, PrintCommand... style) throws IOException;
+    void setItalic(boolean isActive);
 
-    void print(String text) throws IOException;
+    void setUnderline(boolean isActive);
 
-    void printNewLine() throws IOException;
+    void printTitle(String title) throws Exception;
 
-    void printLine(String line) throws IOException;
+    void printPhoto(int resourceId, ESCPOSConstant alignment) throws Exception;
 
-    void setDefaultStyle(PrintCommand... styleAndAlignment) throws IOException;
+    void print(String text, boolean wrapLines, ESCPOSConstant... style) throws IOException;
 
-    void printStyle(PrintCommand... styleAndAlignment) throws IOException;
+    void printNewLine(int numberOfLines) throws IOException;
 
-    void printBarCodeFromText(String text, PrintCommand alignment) throws Exception;
-
-    void resetStyleToDefault() throws IOException;
+    void printBarCodeFromText(String text, ESCPOSConstant alignment) throws Exception;
 
     PrintableDocument build() throws IOException;
 

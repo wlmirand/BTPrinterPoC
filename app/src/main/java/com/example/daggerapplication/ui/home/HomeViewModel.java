@@ -11,11 +11,12 @@ import org.universalpostalunion.printerlibrary.bluetooth.BluetoothService;
 import org.universalpostalunion.printerlibrary.bluetooth.model.DeviceInformation;
 import org.universalpostalunion.printerlibrary.printer.PrinterService;
 import org.universalpostalunion.printerlibrary.printer.builder.PrintableBuilder;
+import org.universalpostalunion.printerlibrary.printer.escpos.ESCPOSConstant;
 import org.universalpostalunion.printerlibrary.printer.exception.PrintException;
 import org.universalpostalunion.printerlibrary.printer.model.PrintStatus;
 import org.universalpostalunion.printerlibrary.printer.model.PrintableDocument;
-import org.universalpostalunion.printerlibrary.printer.util.PrintCommand;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.List;
 
@@ -80,62 +81,47 @@ public class HomeViewModel extends ViewModel {
     private PrintableDocument constructDocument() {
         try {
             final PrintableBuilder builder = printerService.getPrintableBuilder();
-            builder.printPhoto(R.drawable.upu_logo, PrintCommand.ESC_ALIGN_LEFT);
-            builder.printLine(appContext.getResources().getString(R.string.print_delivery_notification_card_title), PrintCommand.TITLE_STYLE, PrintCommand.ESC_ALIGN_CENTER);
-            builder.printNewLine();
-            builder.printNewLine();
+            builder.configure(StandardCharsets.UTF_8);
+            builder.printPhoto(R.drawable.upu_logo, ESCPOSConstant.CMP_ALIGNMENT_LEFT);
+            builder.printTitle(appContext.getResources().getString(R.string.print_delivery_notification_card_title));
+            builder.printNewLine(1);
             final String[] dateAndTime = getDateTime();
             String cardContent = appContext.getResources().getString(R.string.print_delivery_notification_card_content_one);
             cardContent = String.format(cardContent, dateAndTime[0], dateAndTime[1]);
 
-            builder.printLine(
-                    cardContent,
-                    PrintCommand.ESC_ALIGN_LEFT);
+            builder.print(cardContent, true, ESCPOSConstant.CMP_ALIGNMENT_LEFT);
+            builder.printNewLine(1);
+            builder.printBarCodeFromText("item1", ESCPOSConstant.CMP_ALIGNMENT_CENTER);
+            builder.printNewLine(1);
 
-            builder.printBarCodeFromText("item1", PrintCommand.ESC_ALIGN_CENTER);
-            builder.printLine("item1", PrintCommand.ESC_ALIGN_CENTER);
+            final String shipmentWithArticle =
+                    appContext.getResources().getString(R.string.print_delivery_notification_card_shipment) + "    BigMac Party";
 
-            builder.printStyle(PrintCommand.ESC_TAB, PrintCommand.ESC_ALIGN_LEFT);
-            builder.printLine(appContext.getResources().getString(R.string.print_delivery_notification_card_shipment));
+            builder.print(shipmentWithArticle,
+                    false,
+                    ESCPOSConstant.CMP_ALIGNMENT_LEFT);
+            builder.print(appContext.getResources().getString(R.string.print_delivery_notification_card_type),
+                    false, ESCPOSConstant.CMP_ALIGNMENT_LEFT);
+            builder.printNewLine(1);
 
-            builder.print(appContext.getResources().getString(R.string.print_delivery_notification_card_type));
-            builder.printStyle(PrintCommand.ESC_TAB);
-            builder.print("BigMac");
-            builder.printNewLine();
-            builder.printNewLine();
-
-            builder.print(appContext.getResources().getString(R.string.print_delivery_notification_card_recipient));
-            builder.printStyle(PrintCommand.ESC_TAB, PrintCommand.ESC_BOLD);
-            builder.print("William");
-            builder.printStyle(PrintCommand.ESC_NO_BOLD);
-            builder.printNewLine();
-
-            //Recipient Address
-            builder.printStyle(PrintCommand.ESC_TAB);
-            builder.printLine("this is my address");
-
-            //Recipient Postcode
-            builder.printStyle(PrintCommand.ESC_TAB);
-            builder.printLine("PC 5454");
-
-            builder.printStyle(PrintCommand.ESC_TAB);
-            builder.printLine("Marseille");
-
+            builder.print(appContext.getResources().getString(R.string.print_delivery_notification_card_recipient), false);
+            builder.print("\tJean-François Vitali", false);
+            builder.print("\t6B Chemin des Vignes", false);
+            builder.print("\t74100", false);
+            builder.print("\tAjaccio", false);
+            builder.printNewLine(1);
             String retentionPeriod = appContext.getResources().getString(R.string.print_delivery_notification_card_retention_period);
             retentionPeriod = String.format(retentionPeriod, 10);
-            builder.printLine(retentionPeriod, PrintCommand.ESC_ALIGN_LEFT);
-
-            builder.printLine("Picker Point");
-
+            builder.print(retentionPeriod, true, ESCPOSConstant.CMP_ALIGNMENT_LEFT);
+            builder.print("\tPicker Point", false);
             final String[] testPickedPeriod = new String[]{"Mon - 07:00 / 20:00", "Tus - 08:00 / 22:00"};
             for (String s : testPickedPeriod) {
-                builder.printLine(s);
+                builder.print("\t"+s, false);
             }
-
-            builder.printLine(
+            builder.print(
                     appContext.getResources().getString(R.string.print_delivery_notification_card_remember),
-                    PrintCommand.ESC_ALIGN_LEFT);
-
+                    true,
+                    ESCPOSConstant.CMP_ALIGNMENT_LEFT);
             return builder.build();
         } catch (Exception e) {
             e.printStackTrace();

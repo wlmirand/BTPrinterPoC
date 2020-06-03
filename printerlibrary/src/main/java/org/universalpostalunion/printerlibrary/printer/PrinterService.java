@@ -11,6 +11,7 @@ import org.universalpostalunion.printerlibrary.bluetooth.model.DeviceType;
 import org.universalpostalunion.printerlibrary.common.CompositeDisposable;
 import org.universalpostalunion.printerlibrary.printer.builder.PrintableBuilder;
 import org.universalpostalunion.printerlibrary.printer.builder.PrintableBuilderImpl;
+import org.universalpostalunion.printerlibrary.printer.escpos.ESCPOSHelper;
 import org.universalpostalunion.printerlibrary.printer.exception.PrintException;
 import org.universalpostalunion.printerlibrary.printer.model.PrintStatus;
 import org.universalpostalunion.printerlibrary.printer.model.PrintableDocument;
@@ -30,8 +31,10 @@ import io.reactivex.schedulers.Schedulers;
 public class PrinterService {
 
     private static final String LOG_TAG = PrinterService.class.getSimpleName();
+
     private final BluetoothService bluetoothService;
     private final Context appContext;
+    private final ESCPOSHelper escposHelper;
     private Disposable printStatusDisposable;
     private Disposable availablePrintersDisposable;
 
@@ -68,9 +71,10 @@ public class PrinterService {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Inject
-    PrinterService(Context appContext, BluetoothService bluetoothService) {
+    PrinterService(Context appContext, BluetoothService bluetoothService, ESCPOSHelper helper) {
         this.appContext = appContext;
         this.bluetoothService = bluetoothService;
+        escposHelper = helper;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +107,7 @@ public class PrinterService {
      */
     public PrintableBuilder getPrintableBuilder() throws PrintException {
         try {
-            return new PrintableBuilderImpl(appContext);
+            return new PrintableBuilderImpl(appContext, escposHelper);
         } catch (Exception e) {
             throw new PrintException(e);
         }
